@@ -10,12 +10,16 @@ const port = 3000;
 let subscriptions = [];
 
 // VAPID keys for web-push notifications (generate your own!)
-const vapidKeys = webPush.generateVAPIDKeys();
+const vapidKeys = {
+    publicKey: "BKGAHvGpHfhFMOxqd-if5nEHM-a972eR2z3MFwwkn0gTAAFUMiCO9P6ICwurIzFCHUVq-0_esweYl2ziUyHGk9s",
+    privateKey: "z9y8Q6VtywrpdDw1xBAU2eVhQ2DtXjw_6eTeDn-jZ1A"
+};
 webPush.setVapidDetails(
-    'mailto:your-email@example.com',
+    'mailto:somerandomexamplpeperson@gmail.com', // Replace with the email you used in the generator
     vapidKeys.publicKey,
     vapidKeys.privateKey
 );
+
 
 app.use(bodyParser.json());
 app.use(express.static('public'));
