@@ -1,27 +1,57 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notification Dashboard</title>
+    <title>Dashboard</title>
 </head>
-<body style="font-family: Arial, sans-serif; padding: 20px;">
-    <h1>Notification Dashboard</h1>
-    <textarea id="notificationMessage" placeholder="Enter your message" rows="4" style="width: 100%;"></textarea>
-    <button id="sendNotification" style="margin-top: 10px;">Send Notification</button>
+<body>
+    <h1>Send Notification</h1>
+    <input id="notificationMessage" type="text" placeholder="Enter notification message">
+    <button id="sendNotification">Send Notification</button>
 
     <script>
+        // Your VAPID public key (replace with your actual public key)
+        const publicVapidKey = 'BKGAHvGpHfhFMOxqd-if5nEHM-a972eR2z3MFwwkn0gTAAFUMiCO9P6ICwurIzFCHUVq-0_esweYl2ziUyHGk9s';
+
+        // Request notification permission and subscribe the user
+        if ('Notification' in window && 'serviceWorker' in navigator) {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                        registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: publicVapidKey  // Using your VAPID public key here
+                        })
+                        .then(subscription => {
+                            // Send subscription to the backend
+                            fetch('/api/subscribe', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(subscription)
+                            })
+                            .then(response => response.json())
+                            .then(data => console.log('Subscription stored:', data))
+                            .catch(error => console.error('Subscription failed:', error));
+                        })
+                        .catch(err => console.error('Push subscription failed', err));
+                    });
+                }
+            });
+        }
+
+        // Handle the send notification button click
         document.getElementById('sendNotification').addEventListener('click', () => {
             const message = document.getElementById('notificationMessage').value;
-            fetch('/send-notification', {
+            
+            fetch('/api/send-notification', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message }),
             })
             .then(response => response.json())
-            .then(data => alert(data.status))
-            .catch(error => console.error('Error:', error));
+            .then(data => alert('Notification sent!'))
+            .catch(error => console.error('Error sending notification:', error));
         });
     </script>
 </body>
